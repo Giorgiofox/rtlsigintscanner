@@ -1,0 +1,14 @@
+group,name,lo_mhz,hi_mhz,step_khz,mode,default_on,note
+CB 27,CB 27 MHz,26.965,27.405,10,FM,0,Citizen band IT 40ch
+LPD 433,LPD433,433.075,434.775,25,NFM,0,Low power device 70cm
+PMR446,PMR446,446.00625,446.19375,12.5,NFM,1,PMR446 analog 16ch
+HAM 2m,Ham 144-146,144.000,146.000,12.5,NFM,1,2m repeaters/simplex
+HAM 70cm,Ham 430-440,430.000,440.000,12.5,NFM,0,70cm repeaters/simplex
+AIR civ,Airband civile,118.000,137.000,8.33,AM,1,Aeronautico civile VHF
+AIR mil,Airband militare,225.000,400.000,25,AM,0,Aeronautico militare UHF
+MARINE,Marine VHF,156.000,162.025,25,NFM,0,Nautica VHF
+VHF util,Utility VHF alta,160.000,174.000,12.5,NFM,0,Servizi VHF alta
+UHF util,Utility UHF,446.000,470.000,12.5,NFM,0,Servizi/PMR UHF
+VHF low,Utility VHF bassa,68.000,88.000,12.5,NFM,0,Richiede notch FM - RX sordo senza
+TETRA,TETRA 380-400,380.000,400.000,25,TETRA,0,Emergenza - decode fase successiva
+TETRA,TETRA 410-430,410.000,430.000,25,TETRA,0,Commerciale - decode fase successiva

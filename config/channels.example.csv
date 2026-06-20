@@ -1,0 +1,6 @@
+id,enabled,frequency_hz,frequency_mhz,name,system,group,category,mode,priority,attenuation
+1,1,118100000,118.1000,Tower,AIR CIVILE,Approach,AIR CIVILE / Approach,AM,0,0
+2,1,121500000,121.5000,Emergency,AIR CIVILE,Emergency,AIR CIVILE / Emergency,AM,1,0
+3,1,74062500,74.0625,Fire Dept 1,FIRE,District A,FIRE / District A,NFM,0,0
+4,1,145600000,145.6000,Repeater R0,HAM,2m Repeaters,HAM / 2m Repeaters,NFM,0,0
+5,0,433500000,433.5000,PMR Calling,PMR,Simplex,PMR / Simplex,NFM,0,0

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RTL SIGINT SCANNER</title>
+  <link rel="stylesheet" href="/static/style.css?v=32" />
+</head>
+<body>
+  <!-- top bar -->
+  <header class="topbar">
+    <div class="logo"><span class="logo-mark">◢◤</span><span class="logo-txt">RTL <b>SIGINT</b> SCANNER</span></div>
+    <div class="status-pills">
+      <span class="pill" id="pillAgent"><i class="led"></i> AGENT</span>
+      <span class="pill"><b id="pCps">0.0</b> ch/s</span>
+      <span class="pill"><b id="pScan">0</b> in scan</span>
+      <span class="pill"><b id="pRec">0</b> rec</span>
+      <span class="pill" id="pillSize" title="Disk used by all recordings"><b id="pSize">—</b></span>
+      <span class="pill" id="pillVfo"><b id="pVfo">—</b> <small id="pVfoName"></small></span>
+      <span class="pill monnow hidden" id="monNow"></span>
+    </div>
+    <div class="topbar-actions">
+      <button id="gear" class="iconbtn" title="Settings">⚙</button>
+      <button id="monStop" class="iconbtn hidden" title="Stop playback">⏹</button>
+      <button id="monitor" class="power mon" title="Auto-play new transmissions (scanner mode)">▶ MON</button>
+      <button id="power" class="power">…</button>
+    </div>
+  </header>
+
+  <!-- dashboard grid -->
+  <div class="dash">
+
+    <!-- LEFT: banks + memories -->
+    <aside class="col-left">
+      <section class="card grow">
+        <div class="card-head"><h3>Banks</h3><span class="hint" id="bandsInfo"></span></div>
+        <div id="bands" class="bands"></div>
+      </section>
+      <section class="card grow">
+        <div class="card-head"><h3>Memories</h3><span class="hint" id="memCount"></span></div>
+        <div class="mini-filters">
+          <input id="memSearch" placeholder="search…" />
+          <select id="memCat"><option value="">banks</option></select>
+          <select id="memEnabled"><option value="-1">all</option><option value="1">scanning</option><option value="0">excluded</option></select>
+        </div>
+        <div class="mini-filters">
+          <button id="memOn">▸ enable all shown</button><button id="memOff" class="warn">✕ disable all shown</button>
+        </div>
+        <div class="hint" style="margin:2px 0 6px">Per-row toggle = that frequency on/off (live). Buttons = enable/disable all rows shown. Bank on/off (keeping per-channel choices) = Banks above.</div>
+        <div id="memories" class="memories"></div>
+      </section>
+    </aside>
+
+    <!-- CENTER: recordings feed (primary) -->
+    <main class="col-center">
+      <section class="card fill">
+        <div class="card-head">
+          <h3>Recordings</h3>
+          <div class="mini-filters">
+            <input id="search" placeholder="search…" />
+            <select id="fCat"><option value="">banks</option></select>
+            <select id="fMode"><option value="">modes</option><option>AM</option><option>NFM</option><option>FM</option><option>WFM</option></select>
+            <select id="fTime"><option value="">any time</option><option value="1">last hour</option><option value="12">last 12h</option><option value="24">last 24h</option><option value="date">date…</option></select>
+            <input type="date" id="fDate" style="display:none" />
+            <select id="fGroup"><option value="">list</option><option value="freq">by frequency</option></select>
+          </div>
+        </div>
+        <div id="feed" class="feed"></div>
+      </section>
+    </main>
+
+    <!-- RIGHT: S-meter + live activity (full height) -->
+    <aside class="col-right">
+      <section class="card smeter-card" id="smeter">
+        <svg class="sm-svg" viewBox="0 0 240 100" preserveAspectRatio="xMidYMid meet">
+          <path id="smArc" class="sm-arc"/>
+          <path id="smArcRed" class="sm-arc-red"/>
+          <g id="smTicks"></g>
+          <g id="smLabels"></g>
+          <g id="smNeedle"><line x1="120" y1="170" x2="120" y2="14" class="sm-needle"/></g>
+          <rect x="6" y="6" width="228" height="34" rx="9" class="sm-glass"/>
+        </svg>
+        <div class="sm-read"><b id="smVal">—</b> dB over floor <span id="smCh" class="sm-ch"></span></div>
+      </section>
+      <section class="card fill">
+        <div class="card-head"><h3>Live activity</h3>
+          <select id="scanSort" class="mini-sel" title="Sort channels by">
+            <option value="activity">last activity</option>
+            <option value="rec">most recordings</option>
+            <option value="fail">most fails</option>
+            <option value="signal">signal now</option>
+            <option value="mem">memory order</option>
+            <option value="freq">frequency</option>
+          </select>
+          <span class="hint" id="scanInfo"></span></div>
+        <div class="bar-legend">Bar = <b>dB above noise floor</b> · line = threshold · <span class="lg-active">green</span>=active · <b style="color:var(--cyan2)">N▸</b> voice recordings · <b style="color:var(--amber)">N⊘</b> no-voice (click to listen).</div>
+        <div id="scanlist" class="scanlist"></div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- settings modal -->
+  <div id="cfgModal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head"><h2>⚙ Settings</h2><button id="cfgClose" class="iconbtn">✕</button></div>
+      <div id="cfgBody" class="cfg-body"></div>
+    </div>
+  </div>
+
+  <!-- no-voice clips modal -->
+  <div id="nvModal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head"><h2 id="nvTitle">No-voice clips</h2><button id="nvClose" class="iconbtn">✕</button></div>
+      <div id="nvBody" class="nv-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- hidden audio element for Monitor -->
+  <audio id="monAudio"></audio>
+  <script src="/static/app.js?v=32"></script>
+</body>
+</html>

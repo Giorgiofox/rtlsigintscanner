@@ -1,0 +1,20 @@
+services:
+  scanner:
+    build: ./server
+    container_name: rtl-sigint-scanner
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Rome
+      DATA_DIR: /data
+      CONFIG_DIR: /config
+      RECEIVER_NAME: RTL SIGINT SCANNER
+      WHISPER_MODEL: medium
+      WHISPER_COMPUTE: int8
+      WHISPER_MODEL_DIR: /data/models
+      WHISPER_ENABLED: "1"
+      OMP_NUM_THREADS: "6"
+    volumes:
+      - ./data:/data
+      - ./config:/config:ro
+    ports:
+      - "8096:8080"

@@ -1,0 +1,8 @@
+data/
+!data/.gitkeep
+*.bcd
+config/channels.csv
+config/channels_raw.csv
+.env
+__pycache__/
+*.pyc
