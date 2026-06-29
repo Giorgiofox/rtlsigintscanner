@@ -70,6 +70,9 @@ const CFG_SECTIONS = [
     { k: 'keep_rejected', type: 'bool', help: 'Keep the audio of rejected (no-voice) candidates so you can listen and understand WHY a channel fails — carrier? noise? real voice cut by the gate? Click the ⊘ count in Live activity to hear them. OFF (default) = clips are discarded.' },
     { k: 'keep_rejected_max', min: 1, max: 20, step: 1, help: 'How many recent no-voice clips to keep per channel (older ones auto-delete).' },
   ]],
+  ['Retention', [
+    { k: 'retention_days', min: 0, max: 90, step: 1, unit: 'days', help: 'Auto-delete recordings older than this many days. A background task runs hourly (and once at server start). 0 = keep forever. Applies to voice and no-voice clips alike.' },
+  ]],
   ['Display', [
     { k: 'show_smeter', type: 'bool', help: 'Show the analog S-meter (needle) above the Live activity panel.' },
   ]],
@@ -100,6 +103,7 @@ function openConfig() {
   html += `<div class="cfg-sec"><h4>Storage</h4>
     <div class="cfg-help" id="cfgUsage">loading…</div>
     <div class="cfg-actions">
+      <button class="warn" data-retention="1">Delete recordings older than ${Number(settings.retention_days || 0)} days now</button>
       <button class="warn" data-purge='{"kind":"novoice"}'>🗑 Delete all no-voice clips</button>
       <button class="warn" data-purge='{"older":1}'>🗑 Delete recordings older than 24 h</button>
       <button class="warn" data-purge='{"older":7}'>🗑 Delete recordings older than 7 days</button>
@@ -135,6 +139,15 @@ function openConfig() {
     catch (e) { alert('Delete failed: ' + e); }
     showUsage(); loadUsage(); loadFeed();
   });
+  const rb = $('cfgBody').querySelector('[data-retention]');
+  if (rb) rb.onclick = async () => {
+    const days = Number(settings.retention_days || 0);
+    if (days <= 0) { alert('Retention is off. Set Retention > days (above) to a value greater than 0 first.'); return; }
+    if (!confirm(`Delete all recordings older than ${days} days now? Files are deleted permanently and cannot be undone.`)) return;
+    try { const r = await post('/api/recordings/retention/run', {}); alert(`Deleted ${r.deleted} recordings.`); }
+    catch (e) { alert('Delete failed: ' + e); }
+    showUsage(); loadUsage(); loadFeed();
+  };
   $('cfgModal').classList.remove('hidden');
 }
 $('gear').onclick = openConfig;

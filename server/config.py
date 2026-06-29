@@ -51,4 +51,5 @@ DEFAULT_SETTINGS = {
     "carrier_block_seconds": 20,       # carrier must persist this long to be excluded
     "carrier_cooldown_min": 60,        # auto re-include after N min (0 = never)
     "flat_abort_seconds": 3.0,         # abort recording a flat carrier after N s
+    "retention_days": 10,              # auto-delete recordings older than N days (0 = keep forever)
 }

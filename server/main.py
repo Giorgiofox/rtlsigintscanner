@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from db import import_channels, init_db
 from routers import agent, bandplan, channels, recordings, status
-from services import transcription
+from services import retention, transcription
 
 
 @asynccontextmanager
@@ -16,7 +16,9 @@ async def lifespan(app: FastAPI):
     init_db()
     import_channels()
     transcription.start_worker()
+    retention.start_worker()
     yield
+    retention.stop_worker()
     transcription.stop_worker()
 
 

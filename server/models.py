@@ -39,6 +39,7 @@ class SettingsUpdate(BaseModel):
     carrier_block_seconds: int | None = None
     carrier_cooldown_min: int | None = None
     flat_abort_seconds: float | None = None
+    retention_days: int | None = None
 
 
 class AgentHeartbeat(BaseModel):

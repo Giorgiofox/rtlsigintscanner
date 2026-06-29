@@ -1,5 +1,6 @@
 """Recording archive: list, audio stream, delete, agent upload, transcription trigger."""
 import base64
+import datetime as dt
 import hashlib
 import uuid
 from pathlib import Path
@@ -13,6 +14,26 @@ from db import connect, get_settings, now_iso, rows_to_dict
 from models import UploadPayload
 
 router = APIRouter()
+
+
+def delete_recordings_older_than(days: int) -> int:
+    """Delete recordings older than `days` (DB rows + WAV files), voice and no-voice alike.
+    Returns the number removed. days <= 0 is a no-op (keep forever). Shared by the manual
+    'delete now' button and the hourly retention worker."""
+    if days <= 0:
+        return 0
+    cutoff = (dt.datetime.now(dt.UTC) - dt.timedelta(days=days)) \
+        .replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    con = connect()
+    rows = con.execute("select id, file_path from recordings where started_at < ?", (cutoff,)).fetchall()
+    for r in rows:
+        con.execute("delete from recordings where id=?", (r["id"],))
+        try:
+            Path(r["file_path"]).unlink(missing_ok=True)
+        except OSError:
+            pass
+    con.close()
+    return len(rows)
 
 
 @router.get("/api/recordings")
@@ -105,6 +126,15 @@ def purge(payload: dict) -> dict[str, Any]:
             pass
     con.close()
     return {"ok": True, "deleted": len(rows)}
+
+
+@router.post("/api/recordings/retention/run")
+def retention_run() -> dict[str, Any]:
+    """Manual trigger for the same cleanup the retention worker runs: delete recordings
+    older than the configured `retention_days`. Returns how many were removed."""
+    days = int(get_settings().get("retention_days", 0) or 0)
+    deleted = delete_recordings_older_than(days)
+    return {"ok": True, "deleted": deleted, "days": days}
 
 
 @router.get("/api/recordings/{recording_id}/audio")
